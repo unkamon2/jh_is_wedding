@@ -6,7 +6,7 @@
 /* ─── CSS Variables ─── */
 @font-face {
   font-family: 'SeoulNamsan';
-  src: url('/fonts/SEOULNAMSANM.TTF') format('truetype');
+  src: url('./fonts/SEOULNAMSANM.TTF') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
