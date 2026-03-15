@@ -4,6 +4,13 @@
    ═══════════════════════════════════════════ */
 
 /* ─── CSS Variables ─── */
+@font-face {
+  font-family: 'SeoulNamsan';
+  src: url('/fonts/SEOULNAMSANM.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --color-bg: #fdfbf8;
   --color-bg-alt: #f8f4f0;
@@ -28,6 +35,7 @@
 
   --font-serif: 'Nanum Myeongjo', 'Georgia', serif;
   --font-display: 'Cormorant Garamond', 'Nanum Myeongjo', serif;
+  --font-nanum-pen: 'SeoulNamsan', 'Nanum Myeongjo', serif;
 
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
@@ -66,7 +74,7 @@ html {
 }
 
 body {
-  font-family: var(--font-serif);
+  font-family: var(--font-nanum-pen);
   color: var(--color-text);
   background-color: var(--color-bg);
   line-height: 1.8;
@@ -374,7 +382,7 @@ a {
 }
 
 .curtain__names {
-  font-family: var(--font-serif);
+  font-family: var(--font-nanum-pen);
   font-size: 1.75rem;
   font-weight: 400;
   letter-spacing: 6px;
@@ -387,7 +395,7 @@ a {
   padding: 0.875rem 2.5rem;
   border: 1px solid var(--color-accent-light);
   color: var(--color-accent-dark);
-  font-family: var(--font-serif);
+  font-family: var(--font-nanum-pen);
   font-size: 0.875rem;
   font-weight: 400;
   letter-spacing: 3px;
@@ -569,7 +577,7 @@ a {
 }
 
 .section__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-nanum-pen);
   font-size: 1.25rem;
   font-weight: 400;
   letter-spacing: 3px;
@@ -637,7 +645,7 @@ a {
 }
 
 .hero__names {
-  font-family: var(--font-serif);
+  font-family: var(--font-nanum-pen);
   font-size: 1.875rem;
   font-weight: 700;
   letter-spacing: 8px;
@@ -1136,7 +1144,7 @@ a {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-nanum-pen);
   font-size: 0.8125rem;
   font-weight: 400;
   letter-spacing: 1px;
