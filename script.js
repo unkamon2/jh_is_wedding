@@ -580,7 +580,7 @@
     $('#locationHall').textContent = w.hall;
     $('#locationAddress').textContent = w.address;
     $('#locationTel').textContent = w.tel ? `Tel. ${w.tel}` : '';
-    $('#locationMapImg').src = 'images/location/1.jpg';
+    $('#locationMapImg').src = 'images/location/location.png';
     $('#kakaoMapBtn').href = ml.kakao || '#';
     $('#naverMapBtn').href = ml.naver || '#';
 

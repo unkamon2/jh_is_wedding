@@ -38,10 +38,10 @@ const CONFIG = {
   wedding: {
     date: "2026-11-22",
     time: "15:20",
-    venue: "루이비스 웨딩홀",
+    venue: "루이비스컨벤션웨딩홀 송파문정점",
     hall: "그레이스홀",
-    address: "서울특별시 강남구 테헤란로 123",
-    tel: "02-1234-5678"
+    address: "서울시 송파구 법원로 9길 26",
+    tel: "02-6281-9000"
   },
 
   // ── 3. 인사말 ──
@@ -58,8 +58,8 @@ const CONFIG = {
 
   // ── 5. 오시는 길 ──
   mapLinks: {
-    kakao: "https://map.kakao.com/",
-    naver: "https://map.naver.com/"
+    kakao: "https://map.kakao.com/?urlX=525939.999999998&urlY=1106942.9999999993&urlLevel=3&itemId=1862136403&q=%EB%A3%A8%EC%9D%B4%EB%B9%84%EC%8A%A4%EC%BB%A8%EB%B2%A4%EC%85%98%20%EC%86%A1%ED%8C%8C%EB%AC%B8%EC%A0%95%EC%A0%90&srcid=1862136403&map_type=TYPE_MAP",
+    naver: "https://naver.me/Gctrli34"
   },
 
   // ── 6. 마음 전하실 곳 ──
