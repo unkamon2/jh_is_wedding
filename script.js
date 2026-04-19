@@ -43,20 +43,34 @@
         let consecutiveFails = 0;
 
         function tryNext() {
-            if (current > maxAttempts || consecutiveFails >= 3) {
+            if (current > maxAttempts || consecutiveFails >= 10) {  // 더 많은 실패 허용
+                console.log(`Loaded ${images.length} images from ${folder}`);
                 resolve(images);
                 return;
             }
             const img = new Image();
             const paddedNum = String(current).padStart(2, '0');
             const path = `images/${folder}/${paddedNum}.JPG`;
+
+            // 타임아웃 설정
+            const timeout = setTimeout(() => {
+                console.log(`Timeout loading: ${path}`);
+                consecutiveFails++;
+                current++;
+                tryNext();
+            }, 5000); // 5초 타임아웃
+
             img.onload = function() {
+                clearTimeout(timeout);
                 images.push(path);
+                console.log(`Loaded: ${path}`);
                 consecutiveFails = 0;
                 current++;
                 tryNext();
             };
             img.onerror = function() {
+                clearTimeout(timeout);
+                console.log(`Failed to load: ${path}`);
                 consecutiveFails++;
                 current++;
                 tryNext();
@@ -269,7 +283,7 @@
      ═══════════════════════════════════════════ */
 
   function initHero() {
-    $('#heroPhoto').src = 'images/hero/14.jpg';
+    $('#heroPhoto').src = 'images/hero/14.JPG';
     $('#heroNames').textContent = `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
     $('#heroDate').textContent = formatDate(CONFIG.wedding.date, CONFIG.wedding.time);
     $('#heroVenue').textContent = CONFIG.wedding.venue;
