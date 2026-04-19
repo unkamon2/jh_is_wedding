@@ -36,21 +36,22 @@
      Image Auto-Detection
      ═══════════════════════════════════════════ */
 
-  function loadImagesFromFolder(folder, maxAttempts = 50) {
+  function loadImagesFromFolder(folder, maxAttempts = 27, usePadding = true) {
     return new Promise(resolve => {
         const images = [];
         let current = 1;
         let consecutiveFails = 0;
 
         function tryNext() {
-            if (current > maxAttempts || consecutiveFails >= 5) {  // 실패 허용 횟수 증가
+            if (current > maxAttempts || consecutiveFails >= 5) {
                 console.log(`Loaded ${images.length} images from ${folder}`);
                 resolve(images);
                 return;
             }
             const img = new Image();
-            const paddedNum = String(current).padStart(2, '0');
-            const path = `images/${folder}/${paddedNum}.JPG`;
+            const num = usePadding ? String(current).padStart(2, '0') : String(current);
+            const ext = folder === 'story' ? 'jpg' : 'JPG';
+            const path = `images/${folder}/${num}.${ext}`;
             img.onload = function() {
                 images.push(path);
                 consecutiveFails = 0;
@@ -741,8 +742,8 @@
     $('#storyContent').textContent = CONFIG.story.content;
 
     const [storyImages, galleryImages] = await Promise.all([
-      loadImagesFromFolder('story'),
-      loadImagesFromFolder('gallery')
+      loadImagesFromFolder('story', 2, false),      // story: 2개, padding 없음
+      loadImagesFromFolder('gallery', 27, true)     // gallery: 27개, padding 있음
     ]);
 
     initStory(storyImages);
