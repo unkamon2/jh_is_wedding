@@ -48,7 +48,8 @@
                 return;
             }
             const img = new Image();
-            const path = `images/${folder}/${current}.jpg`;
+            const paddedNum = String(current).padStart(2, '0');
+            const path = `images/${folder}/${paddedNum}.JPG`;
             img.onload = function() {
                 images.push(path);
                 consecutiveFails = 0;
@@ -117,7 +118,7 @@
     };
     setMeta('property', 'og:title', m.title);
     setMeta('property', 'og:description', m.description);
-    setMeta('property', 'og:image', 'images/og/1.jpg');
+    setMeta('property', 'og:image', 'images/thumbnail/1.jpg');
     setMeta('name', 'description', m.description);
   }
 
@@ -268,7 +269,7 @@
      ═══════════════════════════════════════════ */
 
   function initHero() {
-    $('#heroPhoto').src = 'images/hero/1.jpg';
+    $('#heroPhoto').src = 'images/hero/14.jpg';
     $('#heroNames').textContent = `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
     $('#heroDate').textContent = formatDate(CONFIG.wedding.date, CONFIG.wedding.time);
     $('#heroVenue').textContent = CONFIG.wedding.venue;
@@ -489,11 +490,13 @@
   let touchEndX = 0;
   let touchStartY = 0;
   let touchEndY = 0;
+  let scrollPosition = 0;
 
   function openPhotoModal(images, index) {
     modalImages = images;
     modalIndex = index;
     showModalImage();
+    scrollPosition = window.scrollY || document.documentElement.scrollTop;
     $('#photoModal').classList.add('is-open');
     document.body.classList.add('no-scroll');
   }
