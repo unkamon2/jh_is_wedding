@@ -42,40 +42,62 @@
         let current = 1;
         let consecutiveFails = 0;
 
+        // 시도할 확장자들 (우선순위 순)
+        const extensions = ['JPG', 'JPEG', 'PNG', 'GIF', 'jpg', 'jpeg', 'png', 'gif'];
+
         function tryNext() {
-            if (current > maxAttempts || consecutiveFails >= 10) {  // 더 많은 실패 허용
+            if (current > maxAttempts || consecutiveFails >= 10) {
                 console.log(`Loaded ${images.length} images from ${folder}`);
                 resolve(images);
                 return;
             }
-            const img = new Image();
+
             const paddedNum = String(current).padStart(2, '0');
-            const path = `images/${folder}/${paddedNum}.JPG`;
 
-            // 타임아웃 설정
-            const timeout = setTimeout(() => {
-                console.log(`Timeout loading: ${path}`);
-                consecutiveFails++;
-                current++;
-                tryNext();
-            }, 5000); // 5초 타임아웃
+            // 현재 파일의 모든 확장자 시도
+            let extIndex = 0;
 
-            img.onload = function() {
-                clearTimeout(timeout);
-                images.push(path);
-                console.log(`Loaded: ${path}`);
-                consecutiveFails = 0;
-                current++;
-                tryNext();
-            };
-            img.onerror = function() {
-                clearTimeout(timeout);
-                console.log(`Failed to load: ${path}`);
-                consecutiveFails++;
-                current++;
-                tryNext();
-            };
-            img.src = path;
+            function tryExtension() {
+                if (extIndex >= extensions.length) {
+                    // 모든 확장자 실패
+                    console.log(`All extensions failed for ${paddedNum}`);
+                    consecutiveFails++;
+                    current++;
+                    tryNext();
+                    return;
+                }
+
+                const ext = extensions[extIndex];
+                const path = `images/${folder}/${paddedNum}.${ext}`;
+                const img = new Image();
+
+                // 타임아웃 설정
+                const timeout = setTimeout(() => {
+                    console.log(`Timeout loading: ${path}`);
+                    extIndex++;
+                    tryExtension();
+                }, 3000); // 3초 타임아웃
+
+                img.onload = function() {
+                    clearTimeout(timeout);
+                    images.push(path);
+                    console.log(`Loaded: ${path}`);
+                    consecutiveFails = 0;
+                    current++;
+                    tryNext();
+                };
+
+                img.onerror = function() {
+                    clearTimeout(timeout);
+                    console.log(`Failed to load: ${path}`);
+                    extIndex++;
+                    tryExtension();
+                };
+
+                img.src = path;
+            }
+
+            tryExtension();
         }
 
         tryNext();
