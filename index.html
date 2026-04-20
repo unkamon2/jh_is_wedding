@@ -21,6 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="config.js"></script>
+  <script async defer src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
 
@@ -30,8 +31,13 @@
     <div class="curtain__wash curtain__wash--bottom"></div>
     <div class="curtain__content">
       <p class="curtain__subtitle">Wedding Invitation</p>
+      <img src="images/gallery/01.JPG" alt="Wedding Photo" class="curtain__photo">
       <p class="curtain__names" id="curtainNames"></p>
-      <button class="curtain__btn" id="curtainBtn">초대장 열기</button>
+      <div class="curtain__buttons">
+        <button class="curtain__btn" id="curtainBtn">초대장 열기</button>
+        <button class="curtain__btn" id="uploadBtn">사진 업로드</button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" style="display: none;">
     </div>
   </div>
 

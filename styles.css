@@ -412,6 +412,21 @@ a {
   border-color: var(--color-accent-light);
 }
 
+.curtain__buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.curtain__photo {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.5);
+}
+
 /* ═══════════════════════════════════════════
    Falling Sparkles Canvas
    ═══════════════════════════════════════════ */
@@ -998,7 +1013,7 @@ a {
   margin-bottom: var(--spacing-lg);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(232, 223, 240, 0.25);
+  box-shadow: 0 4px 24px rgba(63, 63, 63, 0.25);
 }
 
 .location__map-img {

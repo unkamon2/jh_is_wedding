@@ -80,5 +80,11 @@ const CONFIG = {
   meta: {
     title: "신랑 ♥ 신부 결혼합니다",
     description: "2026년 5월 9일, 소중한 분들을 초대합니다."
+  },
+
+  // ── Google Drive 업로드 ──
+  googleDrive: {
+    clientId: 'YOUR_GOOGLE_CLIENT_ID',  // Google API Console에서 생성한 클라이언트 ID
+    enabled: false  // true로 설정하면 업로드 기능 활성화
   }
 };

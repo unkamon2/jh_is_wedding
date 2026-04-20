@@ -142,6 +142,16 @@
 
     namesEl.textContent = `${CONFIG.groom.name}  &  ${CONFIG.bride.name}`;
 
+    // Google Drive 초기화
+    if (CONFIG.googleDrive.enabled && CONFIG.googleDrive.clientId !== 'YOUR_GOOGLE_CLIENT_ID') {
+      gapi.load('client:auth2', function() {
+        gapi.client.init({
+          clientId: CONFIG.googleDrive.clientId,
+          scope: 'https://www.googleapis.com/auth/drive.file'
+        });
+      });
+    }
+
     btn.addEventListener('click', () => {
       curtain.classList.add('is-open');
       document.body.classList.remove('no-scroll');
@@ -149,6 +159,36 @@
         curtain.classList.add('is-hidden');
         initSparkles();
       }, 1400);
+    });
+
+    const uploadBtn = $('#uploadBtn');
+    const photoInput = $('#photoInput');
+    const photoImg = $('.curtain__photo');
+
+    uploadBtn.addEventListener('click', () => {
+      photoInput.click();
+    });
+
+    photoInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          photoImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        // Google Drive 업로드
+        if (CONFIG.googleDrive.enabled) {
+          try {
+            await uploadToGoogleDrive(file);
+            showToast('사진이 Google Drive에 업로드되었습니다');
+          } catch (error) {
+            console.error('Upload failed:', error);
+            showToast('업로드에 실패했습니다');
+          }
+        }
+      }
     });
 
     document.body.classList.add('no-scroll');
@@ -448,14 +488,14 @@
 
     if (storyImages.length === 0) return;
 
-    storyImages.forEach((src, i) => {
-      const div = document.createElement('div');
-      div.className = 'story__photo-item animate-item';
-      div.setAttribute('data-animate', 'fade-up');
-      div.innerHTML = `<img src="${src}" alt="스토리 사진 ${i + 1}" loading="lazy">`;
-      div.addEventListener('click', () => openPhotoModal(storyImages, i));
-      container.appendChild(div);
-    });
+    // storyImages.forEach((src, i) => {
+    //   const div = document.createElement('div');
+    //   div.className = 'story__photo-item animate-item';
+    //   div.setAttribute('data-animate', 'fade-up');
+    //   div.innerHTML = `<img src="${src}" alt="스토리 사진 ${i + 1}" loading="lazy">`;
+    //   div.addEventListener('click', () => openPhotoModal(storyImages, i));
+    //   container.appendChild(div);
+    // });
   }
 
   /* ═══════════════════════════════════════════
@@ -743,7 +783,7 @@
 
     const [storyImages, galleryImages] = await Promise.all([
       loadImagesFromFolder('story', 2, false),      // story: 2개, padding 없음
-      loadImagesFromFolder('gallery', 27, true)     // gallery: 27개, padding 있음
+      loadImagesFromFolder('gallery', 29, true)     // gallery: 27개, padding 있음
     ]);
 
     initStory(storyImages);
