@@ -126,25 +126,42 @@
   }
 
   async function uploadToGoogleDrive(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('folderName', CONFIG.googleDrive.folderName);
+    // 파일을 Base64로 변환
+    const reader = new FileReader();
+    return new Promise((resolve, reject) => {
+      reader.onload = async (e) => {
+        const base64Data = e.target.result.split(',')[1]; // base64 부분만 추출
+        
+        try {
+          const response = await fetch(CONFIG.googleDrive.gasUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              fileName: file.name,
+              fileData: base64Data,
+              mimeType: file.type,
+              folderName: CONFIG.googleDrive.folderName
+            })
+          });
 
-    const response = await fetch(CONFIG.googleDrive.gasUrl, {
-      method: 'POST',
-      body: formData
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.error || 'Upload failed');
+          }
+
+          resolve(data);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.readAsDataURL(file);
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Upload failed');
-    }
-
-    return data;
   }
 
   /* ═══════════════════════════════════════════

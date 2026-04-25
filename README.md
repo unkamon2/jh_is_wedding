@@ -8,17 +8,36 @@
 3. 다음 코드를 붙여넣기:
 
 ```javascript
+function doGet(e) {
+  return ContentService
+    .createTextOutput('GAS Web App is running. Use POST to upload files.')
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
 function doPost(e) {
   try {
-    const folderName = e.parameter.folderName || 'jh_is_wedding_gallery';
-    
-    // FormData에서 파일 추출
-    const fileBlob = e.parameter.file;
-    if (!fileBlob) {
+    // JSON 데이터 파싱
+    const postData = e.postData.getDataAsString();
+    if (!postData) {
       return ContentService
-        .createTextOutput(JSON.stringify({success: false, error: 'No file provided'}))
+        .createTextOutput(JSON.stringify({success: false, error: 'No post data'}))
         .setMimeType(ContentService.MimeType.JSON);
     }
+    
+    const jsonData = JSON.parse(postData);
+    const fileData = jsonData.fileData;
+    const fileName = jsonData.fileName || 'uploaded_image.jpg';
+    const mimeType = jsonData.mimeType || 'image/jpeg';
+    const folderName = jsonData.folderName || 'jh_is_wedding_gallery';
+    
+    if (!fileData) {
+      return ContentService
+        .createTextOutput(JSON.stringify({success: false, error: 'No file data'}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Base64 데이터를 파일로 변환
+    const fileBlob = Utilities.newBlob(Utilities.base64Decode(fileData), mimeType, fileName);
     
     // 폴더 찾기 또는 생성
     const folders = DriveApp.getFoldersByName(folderName);
@@ -29,10 +48,8 @@ function doPost(e) {
       folder = DriveApp.createFolder(folderName);
     }
     
-    // 파일 저장 (원본 파일명 유지)
-    const fileName = fileBlob.getName() || 'uploaded_image.jpg';
+    // 파일 저장
     const savedFile = folder.createFile(fileBlob);
-    savedFile.setName(fileName); // 파일명 설정
     
     return ContentService
       .createTextOutput(JSON.stringify({
