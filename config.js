@@ -65,14 +65,14 @@ const CONFIG = {
   // ── 6. 마음 전하실 곳 ──
   accounts: {
     groom: [
-      { role: "신랑", name: "홍길동", bank: "국민은행", number: "000-000-000000" },
-      { role: "아버지", name: "홍판서", bank: "신한은행", number: "000-000-000000" },
-      { role: "어머니", name: "김부인", bank: "우리은행", number: "000-000-000000" }
+      { role: "신랑", name: "양종혁", bank: "토스뱅크", number: "1000-3404-9406" },
+      { role: "아버지", name: "양동섭", bank: "신한은행", number: "000-000-000000" },
+      { role: "어머니", name: "구정옥", bank: "우리은행", number: "000-000-000000" }
     ],
     bride: [
-      { role: "신부", name: "김영희", bank: "하나은행", number: "000-000-000000" },
-      { role: "아버지", name: "김사장", bank: "기업은행", number: "000-000-000000" },
-      { role: "어머니", name: "이부인", bank: "농협은행", number: "000-000-000000" }
+      { role: "신부", name: "유이슬", bank: "하나은행", number: "1000-3177-2871" },
+      { role: "아버지", name: "유석기", bank: "기업은행", number: "000-000-000000" },
+      { role: "어머니", name: "오예원", bank: "농협은행", number: "000-000-000000" }
     ]
   },
 
@@ -84,7 +84,8 @@ const CONFIG = {
 
   // ── Google Drive 업로드 ──
   googleDrive: {
-    clientId: 'YOUR_GOOGLE_CLIENT_ID',  // Google API Console에서 생성한 클라이언트 ID
-    enabled: false  // true로 설정하면 업로드 기능 활성화
+    gasUrl: 'https://script.google.com/macros/s/AKfycbyvGRX-FB3zA7em3NzeIIm1AoxiFY5QYbjQ9MYIg0eCDNuxa6zi7bhttmD7OxKWdyG3/exec',  // Google Apps Script 웹 앱 URL
+    enabled: true,  // true로 설정하면 업로드 기능 활성화
+    folderName: 'jh_is_wedding_gallery'  // 업로드할 폴더 이름
   }
 };

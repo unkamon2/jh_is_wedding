@@ -125,6 +125,39 @@
     setMeta('name', 'description', m.description);
   }
 
+  async function uploadToGoogleDrive(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folderName', CONFIG.googleDrive.folderName);
+
+    const response = await fetch(CONFIG.googleDrive.gasUrl, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // GAS HtmlService 응답에서 JSON 추출
+    const htmlText = await response.text();
+    const jsonMatch = htmlText.match(/<body>(.*)<\/body>/);
+    const jsonString = jsonMatch ? jsonMatch[1] : htmlText;
+    
+    let data;
+    try {
+      data = JSON.parse(jsonString);
+    } catch (e) {
+      throw new Error('Invalid response format');
+    }
+
+    if (!data.success) {
+      throw new Error(data.error || 'Upload failed');
+    }
+
+    return data;
+  }
+
   /* ═══════════════════════════════════════════
      Curtain (Watercolor Wash)
      ═══════════════════════════════════════════ */
@@ -142,16 +175,6 @@
 
     namesEl.textContent = `${CONFIG.groom.name}  &  ${CONFIG.bride.name}`;
 
-    // Google Drive 초기화
-    if (CONFIG.googleDrive.enabled && CONFIG.googleDrive.clientId !== 'YOUR_GOOGLE_CLIENT_ID') {
-      gapi.load('client:auth2', function() {
-        gapi.client.init({
-          clientId: CONFIG.googleDrive.clientId,
-          scope: 'https://www.googleapis.com/auth/drive.file'
-        });
-      });
-    }
-
     btn.addEventListener('click', () => {
       curtain.classList.add('is-open');
       document.body.classList.remove('no-scroll');
@@ -163,7 +186,6 @@
 
     const uploadBtn = $('#uploadBtn');
     const photoInput = $('#photoInput');
-    const photoImg = $('.curtain__photo');
 
     uploadBtn.addEventListener('click', () => {
       photoInput.click();
@@ -172,13 +194,7 @@
     photoInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          photoImg.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-
-        // Google Drive 업로드
+        // Google Drive 업로드만 수행 (화면 표시 제거)
         if (CONFIG.googleDrive.enabled) {
           try {
             await uploadToGoogleDrive(file);
