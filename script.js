@@ -139,18 +139,7 @@
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    // GAS HtmlService 응답에서 JSON 추출
-    const htmlText = await response.text();
-    const jsonMatch = htmlText.match(/<body>(.*)<\/body>/);
-    const jsonString = jsonMatch ? jsonMatch[1] : htmlText;
-    
-    let data;
-    try {
-      data = JSON.parse(jsonString);
-    } catch (e) {
-      throw new Error('Invalid response format');
-    }
-
+    const data = await response.json();
     if (!data.success) {
       throw new Error(data.error || 'Upload failed');
     }

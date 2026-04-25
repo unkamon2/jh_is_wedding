@@ -15,12 +15,8 @@ function doPost(e) {
     // FormData에서 파일 추출
     const fileBlob = e.parameter.file;
     if (!fileBlob) {
-      const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="Access-Control-Allow-Origin" content="*"></head><body>' + 
-        JSON.stringify({success: false, error: 'No file provided'}) + 
-        '</body></html>';
-        
-      return HtmlService
-        .createHtmlOutput(html)
+      return ContentService
+        .createTextOutput(JSON.stringify({success: false, error: 'No file provided'}))
         .setMimeType(ContentService.MimeType.JSON);
     }
     
@@ -38,37 +34,31 @@ function doPost(e) {
     const savedFile = folder.createFile(fileBlob);
     savedFile.setName(fileName); // 파일명 설정
     
-    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="Access-Control-Allow-Origin" content="*"></head><body>' + 
-      JSON.stringify({
+    return ContentService
+      .createTextOutput(JSON.stringify({
         success: true,
         fileId: savedFile.getId(),
         fileUrl: savedFile.getUrl(),
         fileName: fileName
-      }) + 
-      '</body></html>';
-      
-    return HtmlService
-      .createHtmlOutput(html)
+      }))
       .setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
-    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="Access-Control-Allow-Origin" content="*"></head><body>' + 
-      JSON.stringify({success: false, error: error.toString()}) + 
-      '</body></html>';
-      
-    return HtmlService
-      .createHtmlOutput(html)
+    return ContentService
+      .createTextOutput(JSON.stringify({success: false, error: error.toString()}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 ```
 
-### 2. 웹 앱으로 배포 (테스트 모드 권장)
-1. "배포" > "새 배포" 선택
+### 2. 웹 앱으로 배포 (테스트 배포 권장 - CORS 문제 해결)
+1. "배포" > **"테스트 배포"** 선택 (일반 배포가 아닌 테스트 배포)
 2. 유형: "웹 앱"
-3. **다음 사용자 대신 실행: "나"**
-4. **액세스 권한: "테스터만"** (또는 "모든 사용자" - 검증 필요)
-5. 배포 후 URL 복사
+3. **실행 권한: "나"**
+4. **액세스 권한: "모든 사용자"**
+5. 배포 후 URL 복사 (형식: `.../dev`)
+
+**중요**: 테스트 배포(`/dev`)를 사용해야 CORS 문제가 해결됩니다!
 
 ### Google 검증 경고 해결 방법
 
