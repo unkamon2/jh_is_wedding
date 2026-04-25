@@ -191,38 +191,51 @@
         initSparkles();
       }, 1400);
     });
+    document.body.classList.add('no-scroll');
+  }
 
+  /* ═══════════════════════════════════════════
+     Photo Upload Section
+     ═══════════════════════════════════════════ */
+
+  function initPhotoUpload() {
     const uploadBtn = $('#uploadBtn');
     const photoInput = $('#photoInput');
+    if (!uploadBtn || !photoInput) return;
 
-    uploadBtn.addEventListener('click', () => {
-      photoInput.click();
-    });
+    photoInput.multiple = true;
+    uploadBtn.addEventListener('click', () => photoInput.click());
 
     photoInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const originalText = uploadBtn.textContent;
-        uploadBtn.disabled = true;
-        uploadBtn.textContent = '업로드 중...';
-        // Google Drive 업로드만 수행 (화면 표시 제거)
-        if (CONFIG.googleDrive.enabled) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      const originalText = uploadBtn.textContent;
+      uploadBtn.disabled = true;
+      let successCount = 0;
+
+      if (CONFIG.googleDrive.enabled) {
+        for (let i = 0; i < files.length; i++) {
+          uploadBtn.textContent = `업로드 중 (${i + 1}/${files.length})`;
           try {
-            await uploadToGoogleDrive(file);
-            showToast('사진이 Google Drive에 업로드되었습니다');
+            await uploadToGoogleDrive(files[i]);
+            successCount++;
           } catch (error) {
-            console.error('Upload failed:', error);
-            showToast('업로드에 실패했습니다');
-          } finally {
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = originalText;
-            photoInput.value = ''; // 같은 파일 재선택 가능하도록 초기화
+            console.error(`Upload failed for ${files[i].name}:`, error);
           }
         }
       }
-    });
 
-    document.body.classList.add('no-scroll');
+      if (successCount > 0) {
+        showToast(`${successCount}장의 사진이 업로드되었습니다`);
+      } else {
+        showToast('업로드에 실패했습니다');
+      }
+
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = originalText;
+      photoInput.value = '';
+    });
   }
 
   /* ═══════════════════════════════════════════
@@ -796,6 +809,7 @@
   async function init() {
     setMetaTags();
     initCurtain();
+    initPhotoUpload();
     initHero();
     initCountdown();
     initGreeting();
