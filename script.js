@@ -136,7 +136,9 @@
           const response = await fetch(CONFIG.googleDrive.gasUrl, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              // application/json 대신 text/plain을 사용하여 
+              // CORS Preflight(OPTIONS 요청)를 우회합니다.
+              'Content-Type': 'text/plain'
             },
             body: JSON.stringify({
               fileName: file.name,
@@ -200,6 +202,9 @@
     photoInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (file) {
+        const originalText = uploadBtn.textContent;
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = '업로드 중...';
         // Google Drive 업로드만 수행 (화면 표시 제거)
         if (CONFIG.googleDrive.enabled) {
           try {
@@ -208,6 +213,10 @@
           } catch (error) {
             console.error('Upload failed:', error);
             showToast('업로드에 실패했습니다');
+          } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = originalText;
+            photoInput.value = ''; // 같은 파일 재선택 가능하도록 초기화
           }
         }
       }

@@ -84,7 +84,7 @@ const CONFIG = {
 
   // ── Google Drive 업로드 ──
   googleDrive: {
-    gasUrl: 'https://script.google.com/macros/s/AKfycbzwED5Fl8lLgUlC-F8kmgNu_PEw9Jm-Z8S11dtiCrw/dev',
+    gasUrl: 'https://script.google.com/macros/s/AKfycbyJ0Rz_WyDsNrBkiPax5H90wCGBxk4NugNDIpzp3UgsnBIKsB4y4D4L2en5G_VIYAan/exec',
     enabled: true,  // true로 설정하면 업로드 기능 활성화
     folderName: 'jh_is_wedding_gallery'  // 업로드할 폴더 이름
   }
