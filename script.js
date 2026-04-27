@@ -50,7 +50,7 @@
             }
             const img = new Image();
             const num = usePadding ? String(current).padStart(2, '0') : String(current);
-            const ext = folder === 'story' ? 'jpg' : 'JPG';
+            const ext = folder === 'story' ? 'jpg' : 'jpg';
             const path = `images/${folder}/${num}.${ext}`;
             img.onload = function() {
                 images.push(path);
@@ -356,7 +356,7 @@
      ═══════════════════════════════════════════ */
 
   function initHero() {
-    $('#heroPhoto').src = 'images/hero/14.JPG';
+    $('#heroPhoto').src = 'images/hero/14.jpg';
     $('#heroNames').textContent = `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
     $('#heroDate').textContent = formatDate(CONFIG.wedding.date, CONFIG.wedding.time);
     $('#heroVenue').textContent = CONFIG.wedding.venue;
