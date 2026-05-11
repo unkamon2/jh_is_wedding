@@ -186,6 +186,7 @@
     btn.addEventListener('click', () => {
       curtain.classList.add('is-open');
       document.body.classList.remove('no-scroll');
+      window.scrollTo(0, 0);
       setTimeout(() => {
         curtain.classList.add('is-hidden');
         initSparkles();
