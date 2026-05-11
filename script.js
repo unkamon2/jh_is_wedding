@@ -210,6 +210,9 @@
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
+      // 파일 이름순으로 정렬 (숫자 포함 정렬 방식 사용)
+      files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
       const originalText = uploadBtn.textContent;
       uploadBtn.disabled = true;
       let successCount = 0;
@@ -828,7 +831,7 @@
 
     const [storyImages, galleryImages] = await Promise.all([
       loadImagesFromFolder('story', 2, false),      // story: 2개, padding 없음
-      loadImagesFromFolder('gallery', 29, true)     // gallery: 27개, padding 있음
+      loadImagesFromFolder('gallery', 39, true)     // gallery: 27개, padding 있음
     ]);
 
     initStory(storyImages);
