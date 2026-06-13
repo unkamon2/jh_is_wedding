@@ -577,6 +577,9 @@
 
   let modalImages = [];
   let modalIndex = 0;
+  let currentScale = 1;
+  let initialPinchDistance = 0;
+  let isPinching = false;
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
@@ -586,6 +589,7 @@
   function openPhotoModal(images, index) {
     modalImages = images;
     modalIndex = index;
+    currentScale = 1;
     showModalImage();
     scrollPosition = window.scrollY || document.documentElement.scrollTop;
     $('#photoModal').classList.add('is-open');
@@ -600,6 +604,7 @@
   function showModalImage() {
     const img = $('#modalImg');
     img.src = modalImages[modalIndex];
+    img.style.transform = `scale(${currentScale})`;
     $('#modalCounter').textContent = `${modalIndex + 1} / ${modalImages.length}`;
 
     $('#modalPrev').style.display = modalIndex > 0 ? '' : 'none';
@@ -609,6 +614,7 @@
   function modalNavigate(dir) {
     const newIndex = modalIndex + dir;
     if (newIndex >= 0 && newIndex < modalImages.length) {
+      currentScale = 1;
       modalIndex = newIndex;
       showModalImage();
     }
@@ -636,22 +642,57 @@
 
     // Swipe support
     const container = $('#modalContainer');
+    const img = $('#modalImg');
+
+    // 롱프레스 및 우클릭 메뉴 방지
+    img.addEventListener('contextmenu', (e) => e.preventDefault());
+    img.style.webkitTouchCallout = 'none'; // iOS Safari 컨텍스트 메뉴 방지
+    img.style.userSelect = 'none';         // 텍스트 선택 방지
 
     container.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
+      if (e.touches.length === 2) {
+        isPinching = true;
+        initialPinchDistance = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+      } else {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }
+    }, { passive: false });
+
+    container.addEventListener('touchmove', (e) => {
+      if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const scale = Math.min(Math.max(dist / initialPinchDistance * currentScale, 1), 4);
+        img.style.transform = `scale(${scale})`;
+      }
+    }, { passive: false });
 
     container.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      touchEndY = e.changedTouches[0].screenY;
-      handleSwipe();
+      if (isPinching) {
+        if (e.touches.length === 0) {
+          isPinching = false;
+          const match = img.style.transform.match(/scale\((.+)\)/);
+          currentScale = match ? parseFloat(match[1]) : 1;
+        }
+      } else {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+      }
     }, { passive: true });
   }
 
   function handleSwipe() {
     const diffX = touchStartX - touchEndX;
     const diffY = touchStartY - touchEndY;
+    if (currentScale > 1.1) return;
     const minSwipe = 50;
 
     if (Math.abs(diffX) < minSwipe || Math.abs(diffX) < Math.abs(diffY)) return;
