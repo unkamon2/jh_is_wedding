@@ -123,6 +123,11 @@
     setMeta('property', 'og:description', m.description);
     setMeta('property', 'og:image', 'images/thumbnail/1.jpg');
     setMeta('name', 'description', m.description);
+
+    // 전체 화면 롱프레스 및 우클릭 메뉴 방지
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.body.style.webkitTouchCallout = 'none'; // iOS Safari 컨텍스트 메뉴 방지
+    document.body.style.userSelect = 'none';         // 텍스트 선택 방지
   }
 
   async function uploadToGoogleDrive(file) {
@@ -604,6 +609,7 @@
   function showModalImage() {
     const img = $('#modalImg');
     img.src = modalImages[modalIndex];
+    img.style.transformOrigin = 'center';
     img.style.transform = `scale(${currentScale})`;
     $('#modalCounter').textContent = `${modalIndex + 1} / ${modalImages.length}`;
 
@@ -652,6 +658,13 @@
     container.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         isPinching = true;
+        const rect = img.getBoundingClientRect();
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const originX = ((midX - rect.left) / rect.width) * 100;
+        const originY = ((midY - rect.top) / rect.height) * 100;
+        img.style.transformOrigin = `${originX}% ${originY}%`;
+
         initialPinchDistance = Math.hypot(
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
@@ -676,7 +689,7 @@
 
     container.addEventListener('touchend', (e) => {
       if (isPinching) {
-        if (e.touches.length === 0) {
+        if (e.touches.length < 2) {
           isPinching = false;
           const match = img.style.transform.match(/scale\((.+)\)/);
           currentScale = match ? parseFloat(match[1]) : 1;
