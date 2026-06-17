@@ -365,7 +365,7 @@
      ═══════════════════════════════════════════ */
 
   function initHero() {
-    $('#heroPhoto').src = 'images/hero/poster.png';
+    $('#heroPhoto').src = 'images/hero/poster2.gif';
     $('#heroNames').textContent = `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
     $('#heroDate').textContent = formatDate(CONFIG.wedding.date, CONFIG.wedding.time);
     $('#heroVenue').textContent = CONFIG.wedding.venue;
@@ -590,11 +590,17 @@
   let touchStartY = 0;
   let touchEndY = 0;
   let scrollPosition = 0;
+  let translateX = 0;
+  let translateY = 0;
+  let lastTouchX = 0;
+  let lastTouchY = 0;
 
   function openPhotoModal(images, index) {
     modalImages = images;
     modalIndex = index;
     currentScale = 1;
+    translateX = 0;
+    translateY = 0;
     showModalImage();
     scrollPosition = window.scrollY || document.documentElement.scrollTop;
     $('#photoModal').classList.add('is-open');
@@ -610,7 +616,7 @@
     const img = $('#modalImg');
     img.src = modalImages[modalIndex];
     img.style.transformOrigin = 'center';
-    img.style.transform = `scale(${currentScale})`;
+    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
     $('#modalCounter').textContent = `${modalIndex + 1} / ${modalImages.length}`;
 
     $('#modalPrev').style.display = modalIndex > 0 ? '' : 'none';
@@ -621,6 +627,8 @@
     const newIndex = modalIndex + dir;
     if (newIndex >= 0 && newIndex < modalImages.length) {
       currentScale = 1;
+      translateX = 0;
+      translateY = 0;
       modalIndex = newIndex;
       showModalImage();
     }
@@ -672,6 +680,8 @@
       } else {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
       }
     }, { passive: false });
 
@@ -683,7 +693,17 @@
           e.touches[0].pageY - e.touches[1].pageY
         );
         const scale = Math.min(Math.max(dist / initialPinchDistance * currentScale, 1), 4);
-        img.style.transform = `scale(${scale})`;
+        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+      } else if (e.touches.length === 1 && currentScale > 1.01) {
+        // 확대된 상태에서 한 손가락 드래그 시 시점 이동(Panning) 처리
+        e.preventDefault();
+        const deltaX = e.touches[0].clientX - lastTouchX;
+        const deltaY = e.touches[0].clientY - lastTouchY;
+        translateX += deltaX;
+        translateY += deltaY;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
       }
     }, { passive: false });
 
@@ -693,6 +713,13 @@
           isPinching = false;
           const match = img.style.transform.match(/scale\((.+)\)/);
           currentScale = match ? parseFloat(match[1]) : 1;
+          
+          // 다시 축소되었을 경우 위치 초기화
+          if (currentScale <= 1.01) {
+            translateX = 0;
+            translateY = 0;
+            img.style.transform = `translate(0, 0) scale(1)`;
+          }
         }
       } else {
         touchEndX = e.changedTouches[0].screenX;

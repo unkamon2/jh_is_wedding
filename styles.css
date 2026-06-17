@@ -11,6 +11,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Feeling Passionate Personal Use';
+  src: url('./fonts/Feeling Passionate Personal Use.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --color-bg: #fdfbf8;
   --color-bg-alt: #f8f4f0;
@@ -370,7 +377,7 @@ a {
 
 .curtain__subtitle {
   font-family: var(--font-nanum-pen);
-  font-size: 0.875rem;
+  font-size: 20px;
   font-weight: 300;
   letter-spacing: 4px;
   text-transform: uppercase;
