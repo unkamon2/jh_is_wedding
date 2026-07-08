@@ -121,7 +121,7 @@
     };
     setMeta('property', 'og:title', m.title);
     setMeta('property', 'og:description', m.description);
-    setMeta('property', 'og:image', 'images/thumbnail/1.jpg');
+    setMeta('property', 'og:image', m.image || 'images/gallery/00.jpg');
     setMeta('name', 'description', m.description);
 
     // 전체 화면 롱프레스 및 우클릭 메뉴 방지
