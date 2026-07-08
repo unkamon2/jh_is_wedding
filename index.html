@@ -243,7 +243,12 @@
     <section class="section guestbook" id="guestbook">
       <div class="wc-blob wc-blob--guestbook"></div>
       <div class="section__inner">
-        <h2 class="section__title animate-item" data-animate="fade-up">방명록</h2>
+        <div class="guestbook__header animate-item" data-animate="fade-up">
+          <h2 class="section__title guestbook__title">방명록</h2>
+          <button class="guestbook__refresh" id="guestbookRefreshBtn" type="button" aria-label="방명록 새로고침">
+            &#8635;
+          </button>
+        </div>
 
         <form class="guestbook-form animate-item" id="guestbookForm" data-animate="fade-up">
           <input class="guestbook-form__input" id="guestbookNickname" type="text" maxlength="20" placeholder="닉네임" autocomplete="name" required>

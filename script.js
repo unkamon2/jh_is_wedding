@@ -1010,6 +1010,18 @@
     }
   }
 
+  async function refreshGuestbook() {
+    const refreshBtn = $('#guestbookRefreshBtn');
+    if (refreshBtn) refreshBtn.disabled = true;
+
+    try {
+      await loadGuestbook();
+      showToast('방명록을 새로고침했습니다');
+    } finally {
+      if (refreshBtn) refreshBtn.disabled = false;
+    }
+  }
+
   async function handleGuestbookSubmit(e) {
     e.preventDefault();
     const scrollYBeforeSubmit = window.scrollY || document.documentElement.scrollTop;
@@ -1101,11 +1113,13 @@
     const modal = $('#guestbookModal');
     const closeBtn = $('#guestbookModalClose');
     const moreBtn = $('#guestbookMoreBtn');
+    const refreshBtn = $('#guestbookRefreshBtn');
 
-    if (!form || !modal || !closeBtn || !moreBtn) return;
+    if (!form || !modal || !closeBtn || !moreBtn || !refreshBtn) return;
 
     form.addEventListener('submit', handleGuestbookSubmit);
     moreBtn.addEventListener('click', openGuestbookModal);
+    refreshBtn.addEventListener('click', refreshGuestbook);
     closeBtn.addEventListener('click', closeGuestbookModal);
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeGuestbookModal();
