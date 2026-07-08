@@ -1344,7 +1344,7 @@ a {
   background: rgba(255, 255, 255, 0.76);
   color: var(--color-text);
   font-family: var(--font-nanum-pen);
-  font-size: 0.875rem;
+  font-size: 16px;
   line-height: 1.6;
   outline: none;
   transition: border-color var(--transition), background var(--transition);

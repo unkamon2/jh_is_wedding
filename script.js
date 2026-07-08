@@ -1012,6 +1012,10 @@
 
   async function handleGuestbookSubmit(e) {
     e.preventDefault();
+    const scrollYBeforeSubmit = window.scrollY || document.documentElement.scrollTop;
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
 
     if (!isGuestbookReady()) {
       showToast('방명록 연결 준비 중입니다');
@@ -1048,6 +1052,7 @@
       form.reset();
       showToast('방명록이 등록되었습니다');
       renderGuestbook();
+      setTimeout(() => window.scrollTo({ top: scrollYBeforeSubmit, behavior: 'smooth' }), 120);
     } catch (error) {
       console.error(error);
       showToast('방명록 등록에 실패했습니다');
