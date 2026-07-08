@@ -76,7 +76,7 @@ const CONFIG = {
   meta: {
     title: "신랑 ♥ 신부 결혼합니다",
     description: "2026년 11월 22일, 소중한 분들을 초대합니다.",
-    image: "images/og/1.jpg"
+    image: "https://unkamon2.github.io/jh_is_wedding/images/og/1.jpg"
   },
 
   // ── Google Drive 업로드 ──
