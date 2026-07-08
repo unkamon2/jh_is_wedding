@@ -74,8 +74,8 @@ const CONFIG = {
 
   // ── 링크 공유 시 나타나는 문구 ──
   meta: {
-    title: "신랑 ♥ 신부 결혼합니다",
-    description: "2026년 11월 22일, 소중한 분들을 초대합니다.",
+    title: "종혁 ♥ 이슬 결혼합니다",
+    description: "2026년 11월 22일 오후 3시 20분, 소중한 분들을 초대합니다.",
     image: "https://unkamon2.github.io/jh_is_wedding/images/og/1.jpg"
   },
 
@@ -84,5 +84,11 @@ const CONFIG = {
     gasUrl: 'https://script.google.com/macros/s/AKfycbyJ0Rz_WyDsNrBkiPax5H90wCGBxk4NugNDIpzp3UgsnBIKsB4y4D4L2en5G_VIYAan/exec',
     enabled: true,  // true로 설정하면 업로드 기능 활성화
     folderName: 'jh_is_wedding_gallery'  // 업로드할 폴더 이름
+  },
+
+  // ── 방명록 ──
+  guestbook: {
+    gasUrl: 'https://script.google.com/macros/s/AKfycbxCZJzv8CIJjcROF_49qnlUJo-igAEZYsBci_KvnIItuAzqt434Lnu7WWK3KCWjuAwsVQ/exec',
+    enabled: true
   }
 };

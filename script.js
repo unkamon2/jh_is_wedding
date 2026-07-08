@@ -869,6 +869,263 @@
   }
 
   /* ═══════════════════════════════════════════
+     Guestbook
+     ═══════════════════════════════════════════ */
+
+  let guestbookEntries = [];
+
+  function isGuestbookReady() {
+    return Boolean(CONFIG.guestbook && CONFIG.guestbook.enabled && CONFIG.guestbook.gasUrl);
+  }
+
+  function formatGuestbookDate(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const date = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}.${month}.${date} ${hours}:${minutes}`;
+  }
+
+  async function guestbookRequest(action, payload = {}) {
+    const url = new URL(CONFIG.guestbook.gasUrl);
+    url.searchParams.set('action', action);
+
+    Object.entries(payload).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Guestbook request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Guestbook request failed');
+    }
+    return data;
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function guestbookRequestWithRetry(action, payload = {}, maxRetries = 3) {
+    let lastError;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await guestbookRequest(action, payload);
+      } catch (error) {
+        lastError = error;
+        if (attempt === maxRetries) break;
+        await sleep(700 * (attempt + 1));
+      }
+    }
+
+    throw lastError;
+  }
+
+  function createGuestbookCard(entry) {
+    const card = document.createElement('article');
+    card.className = 'guestbook-card';
+
+    const meta = document.createElement('div');
+    meta.className = 'guestbook-card__meta';
+
+    const name = document.createElement('span');
+    name.className = 'guestbook-card__name';
+    name.textContent = entry.nickname || '익명';
+
+    const date = document.createElement('time');
+    date.className = 'guestbook-card__date';
+    date.dateTime = entry.createdAt || '';
+    date.textContent = formatGuestbookDate(entry.createdAt);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'guestbook-card__delete';
+    deleteBtn.type = 'button';
+    deleteBtn.setAttribute('aria-label', '방명록 삭제');
+    deleteBtn.dataset.id = entry.id;
+    deleteBtn.textContent = '×';
+
+    const content = document.createElement('p');
+    content.className = 'guestbook-card__content';
+    content.textContent = entry.content || '';
+
+    meta.append(name, date);
+    card.append(meta, deleteBtn, content);
+    return card;
+  }
+
+  function renderGuestbookList(container, entries) {
+    container.innerHTML = '';
+
+    if (!entries.length) {
+      const empty = document.createElement('p');
+      empty.className = 'guestbook-empty';
+      empty.textContent = isGuestbookReady() ? '아직 남겨진 방명록이 없습니다.' : '방명록 연결을 준비 중입니다.';
+      container.appendChild(empty);
+      return;
+    }
+
+    entries.forEach((entry) => {
+      container.appendChild(createGuestbookCard(entry));
+    });
+  }
+
+  function renderGuestbook() {
+    const list = $('#guestbookList');
+    const modalList = $('#guestbookModalList');
+    const moreBtn = $('#guestbookMoreBtn');
+    if (!list || !modalList || !moreBtn) return;
+
+    renderGuestbookList(list, guestbookEntries.slice(0, 3));
+    renderGuestbookList(modalList, guestbookEntries);
+    moreBtn.style.display = guestbookEntries.length > 0 ? 'inline-flex' : 'none';
+  }
+
+  async function loadGuestbook() {
+    if (!isGuestbookReady()) {
+      renderGuestbook();
+      return;
+    }
+
+    try {
+      const data = await guestbookRequest('list');
+      guestbookEntries = data.entries || [];
+      renderGuestbook();
+    } catch (error) {
+      console.error(error);
+      showToast('방명록을 불러오지 못했습니다');
+      renderGuestbook();
+    }
+  }
+
+  async function handleGuestbookSubmit(e) {
+    e.preventDefault();
+
+    if (!isGuestbookReady()) {
+      showToast('방명록 연결 준비 중입니다');
+      return;
+    }
+
+    const form = e.currentTarget;
+    const submitBtn = $('#guestbookSubmit');
+    const nickname = $('#guestbookNickname').value.trim();
+    const content = $('#guestbookContent').value.trim();
+    const password = $('#guestbookPassword').value.trim();
+
+    if (!nickname) {
+      showToast('닉네임을 입력해주세요');
+      return;
+    }
+
+    if (!content) {
+      showToast('내용을 입력해주세요');
+      return;
+    }
+
+    if (!password) {
+      showToast('비밀번호를 입력해주세요');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '등록 중';
+
+    try {
+      const data = await guestbookRequestWithRetry('create', { nickname, content, password });
+      guestbookEntries = data.entries || [];
+      form.reset();
+      showToast('방명록이 등록되었습니다');
+      renderGuestbook();
+    } catch (error) {
+      console.error(error);
+      showToast('방명록 등록에 실패했습니다');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '등록';
+    }
+  }
+
+  async function handleGuestbookDelete(id) {
+    if (!isGuestbookReady()) {
+      showToast('방명록 연결 준비 중입니다');
+      return;
+    }
+
+    const password = window.prompt('삭제 비밀번호를 입력해주세요.');
+    if (password === null) return;
+    if (!password.trim()) {
+      showToast('비밀번호를 입력해주세요');
+      return;
+    }
+
+    try {
+      const data = await guestbookRequestWithRetry('delete', { id, password: password.trim() });
+      guestbookEntries = data.entries || [];
+      showToast('방명록이 삭제되었습니다');
+      renderGuestbook();
+    } catch (error) {
+      console.error(error);
+      showToast('비밀번호가 맞지 않거나 삭제에 실패했습니다');
+    }
+  }
+
+  function openGuestbookModal() {
+    $('#guestbookModal').classList.add('is-open');
+    document.body.classList.add('no-scroll');
+  }
+
+  function closeGuestbookModal() {
+    $('#guestbookModal').classList.remove('is-open');
+    document.body.classList.remove('no-scroll');
+  }
+
+  function initGuestbook() {
+    const form = $('#guestbookForm');
+    const modal = $('#guestbookModal');
+    const closeBtn = $('#guestbookModalClose');
+    const moreBtn = $('#guestbookMoreBtn');
+
+    if (!form || !modal || !closeBtn || !moreBtn) return;
+
+    form.addEventListener('submit', handleGuestbookSubmit);
+    moreBtn.addEventListener('click', openGuestbookModal);
+    closeBtn.addEventListener('click', closeGuestbookModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeGuestbookModal();
+    });
+
+    document.addEventListener('click', (e) => {
+      const deleteBtn = e.target.closest('.guestbook-card__delete');
+      if (!deleteBtn) return;
+      handleGuestbookDelete(deleteBtn.dataset.id);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+        closeGuestbookModal();
+      }
+    });
+
+    if (!isGuestbookReady()) {
+      $('#guestbookSubmit').disabled = true;
+    }
+
+    loadGuestbook();
+  }
+
+  /* ═══════════════════════════════════════════
      Footer
      ═══════════════════════════════════════════ */
 
@@ -953,6 +1210,7 @@
     initPhotoModal();
     initLocation();
     initAccounts();
+    initGuestbook();
     initFooter();
     initScrollAnimations();
 
