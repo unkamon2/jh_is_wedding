@@ -108,6 +108,20 @@
     }
   }
 
+  /* -------------------------------------------------------------------------
+     Background Music
+     ------------------------------------------------------------------------- */
+
+  const bgm = new Audio('assets/bgm.mp3');
+  bgm.loop = true;
+  bgm.preload = 'auto';
+
+  function playBgm() {
+    bgm.play().catch((error) => {
+      console.warn('BGM playback was blocked or failed:', error);
+    });
+  }
+
   /* ═══════════════════════════════════════════
      OG Meta Tags
      ═══════════════════════════════════════════ */
@@ -189,6 +203,7 @@
     namesEl.textContent = `${CONFIG.groom.name}  &  ${CONFIG.bride.name}`;
 
     btn.addEventListener('click', () => {
+      playBgm();
       curtain.classList.add('is-open');
       document.body.classList.remove('no-scroll');
       window.scrollTo(0, 0);
@@ -830,7 +845,7 @@
     const year = dt.getFullYear();
     const month = String(dt.getMonth() + 1).padStart(2, '0');
     const day = String(dt.getDate()).padStart(2, '0');
-    $('#footerText').textContent = `${CONFIG.groom.name} & ${CONFIG.bride.name} — ${year}.${month}.${day}.`;
+    $('#footerText').textContent = `${CONFIG.groom.name} & ${CONFIG.bride.name} — ${year}.${month}.${day}..`;
   }
 
   /* ═══════════════════════════════════════════
