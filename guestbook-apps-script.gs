@@ -1,6 +1,8 @@
 const SPREADSHEET_ID = '';
 const SHEET_NAME = 'Guestbook';
 const PASSWORD_SALT = 'jh_is_wedding_guestbook';
+const MAX_DAILY_ENTRIES = 300;
+const DUPLICATE_WINDOW_SECONDS = 60;
 
 function doPost(e) {
   try {
@@ -110,6 +112,8 @@ function createEntry(payload) {
 
   try {
     const sheet = getSheet();
+    assertCanCreate(sheet, nickname, content);
+
     const id = Utilities.getUuid();
     const createdAt = new Date();
     sheet.appendRow([id, createdAt, nickname, content, hashPassword(password)]);
@@ -151,6 +155,38 @@ function deleteEntry(payload) {
     throw new Error('Entry not found');
   } finally {
     lock.releaseLock();
+  }
+}
+
+function assertCanCreate(sheet, nickname, content) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const duplicateWindowStart = new Date(now.getTime() - DUPLICATE_WINDOW_SECONDS * 1000);
+  const rows = sheet.getRange(2, 2, lastRow - 1, 3).getValues();
+  let todayCount = 0;
+
+  rows.forEach(row => {
+    const createdAt = row[0] instanceof Date ? row[0] : new Date(row[0]);
+    if (Number.isNaN(createdAt.getTime())) return;
+
+    if (createdAt >= todayStart) {
+      todayCount++;
+    }
+
+    if (
+      createdAt >= duplicateWindowStart &&
+      String(row[1] || '') === nickname &&
+      String(row[2] || '') === content
+    ) {
+      throw new Error('Duplicate entry');
+    }
+  });
+
+  if (todayCount >= MAX_DAILY_ENTRIES) {
+    throw new Error('Daily limit exceeded');
   }
 }
 

@@ -256,6 +256,12 @@
     const photoInput = $('#photoInput');
     if (!uploadBtn || !photoInput) return;
 
+    if (!CONFIG.googleDrive || !CONFIG.googleDrive.enabled) {
+      uploadBtn.style.display = 'none';
+      photoInput.disabled = true;
+      return;
+    }
+
     photoInput.multiple = true;
     uploadBtn.addEventListener('click', () => photoInput.click());
 
@@ -1067,7 +1073,13 @@
       setTimeout(() => window.scrollTo({ top: scrollYBeforeSubmit, behavior: 'smooth' }), 120);
     } catch (error) {
       console.error(error);
-      showToast('방명록 등록에 실패했습니다');
+      if (error.message === 'Duplicate entry') {
+        showToast('이미 등록된 방명록입니다');
+      } else if (error.message === 'Daily limit exceeded') {
+        showToast('오늘 등록 가능한 방명록 수를 초과했습니다');
+      } else {
+        showToast('방명록 등록에 실패했습니다');
+      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = '등록';

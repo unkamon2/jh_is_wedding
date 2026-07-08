@@ -82,13 +82,13 @@ const CONFIG = {
   // ── Google Drive 업로드 ──
   googleDrive: {
     gasUrl: 'https://script.google.com/macros/s/AKfycbyJ0Rz_WyDsNrBkiPax5H90wCGBxk4NugNDIpzp3UgsnBIKsB4y4D4L2en5G_VIYAan/exec',
-    enabled: true,  // true로 설정하면 업로드 기능 활성화
+    enabled: false,  // true로 설정하면 업로드 기능 활성화
     folderName: 'jh_is_wedding_gallery'  // 업로드할 폴더 이름
   },
 
   // ── 방명록 ──
   guestbook: {
-    gasUrl: 'https://script.google.com/macros/s/AKfycbxCZJzv8CIJjcROF_49qnlUJo-igAEZYsBci_KvnIItuAzqt434Lnu7WWK3KCWjuAwsVQ/exec',
+    gasUrl: 'https://script.google.com/macros/s/AKfycbzD40lSF8xIQv2og2OnVqJSN6SJUz7-elkb-eSwh43fsJrGPcYlyoYfTax27mHN-1qJeA/exec',
     enabled: true
   }
 };
