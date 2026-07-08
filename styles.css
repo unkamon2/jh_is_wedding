@@ -667,6 +667,68 @@ a {
   z-index: 0;
 }
 
+.bgm-toggle {
+  position: absolute;
+  top: calc(1rem + var(--safe-top));
+  right: calc(1rem + var(--safe-right));
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-light);
+  box-shadow: 0 6px 18px rgba(74, 74, 74, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.bgm-toggle__icon {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(1.5rem - 4px);
+  height: calc(1.5rem - 4px);
+  border-radius: 50%;
+  background: var(--color-white);
+  box-shadow: 0 1px 4px rgba(74, 74, 74, 0.2);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: #000000;
+  transition: color var(--transition), transform var(--transition);
+}
+
+.bgm-toggle__switch {
+  position: relative;
+  width: 2.8rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(158, 158, 158, 0.42);
+  transition: background var(--transition);
+}
+
+.bgm-toggle.is-playing {
+  background: transparent;
+  color: var(--color-accent-dark);
+}
+
+.bgm-toggle.is-playing .bgm-toggle__icon {
+  color: #f6d34a;
+  transform: translateX(1.3rem);
+}
+
+.bgm-toggle.is-playing .bgm-toggle__switch {
+  background: var(--color-accent-light);
+}
+
 .hero__content {
   position: relative;
   z-index: 2;

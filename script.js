@@ -116,9 +116,41 @@
   bgm.loop = true;
   bgm.preload = 'auto';
 
+  function updateBgmToggle(isPlaying) {
+    const btn = $('#bgmToggle');
+    if (!btn) return;
+
+    btn.classList.toggle('is-playing', isPlaying);
+    btn.setAttribute('aria-pressed', String(isPlaying));
+    btn.setAttribute('aria-label', isPlaying ? '배경음악 끄기' : '배경음악 켜기');
+  }
+
   function playBgm() {
-    bgm.play().catch((error) => {
+    return bgm.play().then(() => {
+      updateBgmToggle(true);
+    }).catch((error) => {
+      updateBgmToggle(false);
       console.warn('BGM playback was blocked or failed:', error);
+    });
+  }
+
+  function pauseBgm() {
+    bgm.pause();
+    updateBgmToggle(false);
+  }
+
+  function initBgmToggle() {
+    const btn = $('#bgmToggle');
+    if (!btn) return;
+
+    updateBgmToggle(!bgm.paused);
+
+    btn.addEventListener('click', () => {
+      if (bgm.paused) {
+        playBgm();
+      } else {
+        pauseBgm();
+      }
     });
   }
 
@@ -909,6 +941,7 @@
   async function init() {
     setMetaTags();
     initCurtain();
+    initBgmToggle();
     initPhotoUpload();
     initHero();
     initCountdown();
