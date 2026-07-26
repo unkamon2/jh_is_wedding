@@ -1195,6 +1195,86 @@ a {
   justify-content: center;
 }
 
+.location__guide {
+  max-width: 400px;
+  margin: var(--spacing-lg) auto 0;
+  text-align: left;
+}
+
+.location__guide-row {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 0.875rem;
+  align-items: start;
+}
+
+.location__guide-row + .location__guide-row {
+  margin-top: 1.125rem;
+  padding-top: 1.125rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.location__guide-title {
+  display: inline-flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: var(--color-bg-card);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.location__guide-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.location__guide-list li {
+  display: flex;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-text-light);
+}
+
+.location__guide-list strong {
+  flex: 0 0 auto;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.location__guide-list strong::after {
+  content: ":";
+}
+
+.location__guide-text {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-text-light);
+}
+
+@media (max-width: 380px) {
+  .location__guide-row {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .location__guide-title {
+    justify-self: start;
+  }
+}
+
 /* ═══════════════════════════════════════════
    Account Section (축의금)
    ═══════════════════════════════════════════ */

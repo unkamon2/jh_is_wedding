@@ -421,7 +421,7 @@
     $('#heroPhoto').src = 'images/hero/poster2.gif';
     $('#heroNames').textContent = `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
     $('#heroDate').textContent = formatDate(CONFIG.wedding.date, CONFIG.wedding.time);
-    $('#heroVenue').textContent = CONFIG.wedding.venue;
+    $('#heroVenue').textContent = CONFIG.wedding.venue +" "+ CONFIG.wedding.hall;
   }
 
   /* ═══════════════════════════════════════════
@@ -578,30 +578,6 @@
       URL.revokeObjectURL(url);
       showToast('캘린더 파일이 다운로드됩니다');
     });
-  }
-
-  /* ═══════════════════════════════════════════
-     Story Section
-     ═══════════════════════════════════════════ */
-
-  function initStory(storyImages) {
-    $('#storyTitle').textContent = CONFIG.story.title;
-    $('#storyContent').textContent = CONFIG.story.content;
-
-    const container = $('#storyPhotos');
-    const placeholder = container.querySelector('.loading-placeholder');
-    if (placeholder) placeholder.remove();
-
-    if (storyImages.length === 0) return;
-
-    // storyImages.forEach((src, i) => {
-    //   const div = document.createElement('div');
-    //   div.className = 'story__photo-item animate-item';
-    //   div.setAttribute('data-animate', 'fade-up');
-    //   div.innerHTML = `<img src="${src}" alt="스토리 사진 ${i + 1}" loading="lazy">`;
-    //   div.addEventListener('click', () => openPhotoModal(storyImages, i));
-    //   container.appendChild(div);
-    // });
   }
 
   /* ═══════════════════════════════════════════
@@ -1253,7 +1229,6 @@
       loadImagesFromFolder('gallery', 39, true)     // gallery: 27개, padding 있음
     ]);
 
-    initStory(storyImages);
     initGallery(galleryImages);
   }
 
