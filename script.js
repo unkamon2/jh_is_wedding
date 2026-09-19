@@ -420,8 +420,10 @@
   function initHero() {
     $('#heroPhoto').src = 'images/hero/poster2.gif';
     $('#heroNames').textContent = `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
-    $('#heroDate').textContent = formatDate(CONFIG.wedding.date, CONFIG.wedding.time);
-    $('#heroVenue').textContent = CONFIG.wedding.venue +" "+ CONFIG.wedding.hall;
+    const { date, time, venue, hall } = CONFIG.wedding;
+    const weekday = ['일', '월', '화', '수', '목', '금', '토'][getWeddingDateTime().getDay()];
+    $('#heroDate').textContent = `${date.slice(2).replace(/-/g, '.')} (${weekday}) ${time}`;
+    $('#heroVenue').textContent = `${venue.replace(/\s+/, '\n')} ${hall}`;
   }
 
   /* ═══════════════════════════════════════════
