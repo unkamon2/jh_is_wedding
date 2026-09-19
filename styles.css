@@ -588,7 +588,7 @@ a {
   align-items: center;
   justify-content: center;
   padding: 3.5rem 2.5rem;
-  touch-action: pan-y;
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -598,7 +598,7 @@ a {
   max-height: 100%;
   object-fit: contain;
   border-radius: var(--radius-md);
-  transition: transform 0.3s ease;
+  transition: none;
 }
 
 .photo-modal__counter {

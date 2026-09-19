@@ -613,6 +613,13 @@
   let modalIndex = 0;
   let currentScale = 1;
   let initialPinchDistance = 0;
+  let pinchStartScale = 1;
+  let pinchAnchorX = 0;
+  let pinchAnchorY = 0;
+  let imageCenterX = 0;
+  let imageCenterY = 0;
+  let swipeAllowed = false;
+  let suppressModalClick = false;
   let isPinching = false;
   let touchStartX = 0;
   let touchEndX = 0;
@@ -642,6 +649,9 @@
   }
 
   function showModalImage() {
+    isPinching = false;
+    swipeAllowed = false;
+    suppressModalClick = false;
     const img = $('#modalImg');
     img.src = modalImages[modalIndex];
     img.style.transformOrigin = 'center';
@@ -670,6 +680,10 @@
 
     const modal = $('#photoModal');
     modal.addEventListener('click', (e) => {
+      if (suppressModalClick && (e.target === modal || e.target === $('#modalContainer') || e.target === $('#modalImg'))) {
+        e.preventDefault();
+        return;
+      }
       if (e.target === modal || e.target.id === 'modalContainer') {
         closePhotoModal();
       }
@@ -692,70 +706,113 @@
     img.style.webkitTouchCallout = 'none'; // iOS Safari 컨텍스트 메뉴 방지
     img.style.userSelect = 'none';         // 텍스트 선택 방지
 
-    container.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 2) {
-        isPinching = true;
-        const rect = img.getBoundingClientRect();
-        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        const originX = ((midX - rect.left) / rect.width) * 100;
-        const originY = ((midY - rect.top) / rect.height) * 100;
-        img.style.transformOrigin = `${originX}% ${originY}%`;
+    function renderTransform() {
+      // Keep the image inside the viewport, and center axes that fit entirely.
+      const maxX = Math.max(0, (img.offsetWidth * currentScale - container.clientWidth) / 2);
+      const maxY = Math.max(0, (img.offsetHeight * currentScale - container.clientHeight) / 2);
+      translateX = Math.max(-maxX, Math.min(maxX, translateX));
+      translateY = Math.max(-maxY, Math.min(maxY, translateY));
+      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+    }
 
-        initialPinchDistance = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-      } else {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
+    function beginPinch(touches) {
+      isPinching = true;
+      swipeAllowed = false;
+      suppressModalClick = true;
+      const rect = img.getBoundingClientRect();
+      imageCenterX = rect.left + rect.width / 2 - translateX;
+      imageCenterY = rect.top + rect.height / 2 - translateY;
+      const midX = (touches[0].clientX + touches[1].clientX) / 2;
+      const midY = (touches[0].clientY + touches[1].clientY) / 2;
+      pinchAnchorX = (midX - imageCenterX - translateX) / currentScale;
+      pinchAnchorY = (midY - imageCenterY - translateY) / currentScale;
+      pinchStartScale = currentScale;
+      initialPinchDistance = Math.max(1, Math.hypot(
+        touches[0].clientX - touches[1].clientX,
+        touches[0].clientY - touches[1].clientY
+      ));
+    }
+
+    container.addEventListener('touchstart', (e) => {
+      if (e.touches.length >= 2) {
+        e.preventDefault();
+        beginPinch(e.touches);
+      } else if (e.touches.length === 1) {
+        isPinching = false;
+        swipeAllowed = currentScale === 1;
+        suppressModalClick = false;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        lastTouchX = touchStartX;
+        lastTouchY = touchStartY;
       }
     }, { passive: false });
 
     container.addEventListener('touchmove', (e) => {
-      if (isPinching && e.touches.length === 2) {
-        e.preventDefault();
+      e.preventDefault();
+      if (e.touches.length >= 2) {
+        if (!isPinching) beginPinch(e.touches);
         const dist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
         );
-        const scale = Math.min(Math.max(dist / initialPinchDistance * currentScale, 1), 4);
-        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-      } else if (e.touches.length === 1 && currentScale > 1.01) {
-        // 확대된 상태에서 한 손가락 드래그 시 시점 이동(Panning) 처리
-        e.preventDefault();
-        const deltaX = e.touches[0].clientX - lastTouchX;
-        const deltaY = e.touches[0].clientY - lastTouchY;
-        translateX += deltaX;
-        translateY += deltaY;
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
-        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        currentScale = Math.min(4, Math.max(1, pinchStartScale * dist / initialPinchDistance));
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        translateX = midX - imageCenterX - pinchAnchorX * currentScale;
+        translateY = midY - imageCenterY - pinchAnchorY * currentScale;
+        renderTransform();
+      } else if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        if (Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY) > 8) {
+          suppressModalClick = true;
+        }
+        if (currentScale > 1) {
+          swipeAllowed = false;
+          translateX += touch.clientX - lastTouchX;
+          translateY += touch.clientY - lastTouchY;
+          renderTransform();
+        }
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
       }
     }, { passive: false });
 
     container.addEventListener('touchend', (e) => {
-      if (isPinching) {
-        if (e.touches.length < 2) {
-          isPinching = false;
-          const match = img.style.transform.match(/scale\((.+)\)/);
-          currentScale = match ? parseFloat(match[1]) : 1;
-          
-          // 다시 축소되었을 경우 위치 초기화
-          if (currentScale <= 1.01) {
-            translateX = 0;
-            translateY = 0;
-            img.style.transform = `translate(0, 0) scale(1)`;
-          }
-        }
-      } else {
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        handleSwipe();
+      if (e.touches.length >= 2) {
+        beginPinch(e.touches);
+        return;
       }
+      isPinching = false;
+      if (e.touches.length === 1) {
+        // Rebase the remaining finger so pinch-to-pan never jumps or swipes.
+        swipeAllowed = false;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+        return;
+      }
+      if (swipeAllowed && e.changedTouches.length) {
+        touchEndX = e.changedTouches[0].clientX;
+        touchEndY = e.changedTouches[0].clientY;
+        const moved = suppressModalClick;
+        handleSwipe();
+        suppressModalClick = moved;
+      }
+      swipeAllowed = false;
+      renderTransform();
     }, { passive: true });
+
+    container.addEventListener('touchcancel', () => {
+      isPinching = false;
+      swipeAllowed = false;
+      suppressModalClick = true;
+      renderTransform();
+    }, { passive: true });
+
+    img.addEventListener('load', renderTransform);
+    window.addEventListener('resize', () => {
+      if (modal.classList.contains('is-open')) renderTransform();
+    });
   }
 
   function handleSwipe() {
@@ -1110,6 +1167,10 @@
     refreshBtn.addEventListener('click', refreshGuestbook);
     closeBtn.addEventListener('click', closeGuestbookModal);
     modal.addEventListener('click', (e) => {
+      if (suppressModalClick && (e.target === modal || e.target === $('#modalContainer') || e.target === $('#modalImg'))) {
+        e.preventDefault();
+        return;
+      }
       if (e.target === modal) closeGuestbookModal();
     });
 
