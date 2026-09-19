@@ -1139,6 +1139,22 @@ a {
   transition: transform var(--transition-slow);
 }
 
+.gallery__image-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+}
+
+.gallery__loading {
+  color: var(--color-text-light);
+  font-size: 0.875rem;
+}
+
 .gallery__item:hover img {
   transform: scale(1.08);
 }

@@ -586,27 +586,68 @@
      Gallery Section
      ═══════════════════════════════════════════ */
 
-  function initGallery(galleryImages) {
+  async function initGallery(galleryImages) {
     const grid = $('#galleryGrid');
-    const placeholder = grid.querySelector('.loading-placeholder');
-    if (placeholder) placeholder.remove();
-
+    grid.replaceChildren();
     if (galleryImages.length === 0) {
-      const gallerySection = $('#gallery');
-      if (gallerySection) gallerySection.style.display = 'none';
+      $('#gallery').style.display = 'none';
       return;
     }
 
-    galleryImages.forEach((src, i) => {
-      const div = document.createElement('div');
-      div.className = 'gallery__item animate-item';
-      div.setAttribute('data-animate', 'scale-in');
-      div.innerHTML = `<img src="${src}" alt="갤러리 사진 ${i + 1}" loading="lazy">`;
-      div.addEventListener('click', () => openPhotoModal(galleryImages, i));
-      grid.appendChild(div);
-    });
-  }
+    const loader = document.createElement('div');
+    loader.className = 'loading-placeholder gallery__loading';
+    loader.setAttribute('role', 'status');
+    loader.innerHTML = '<span class="loading-dot" aria-hidden="true"></span><span class="loading-dot" aria-hidden="true"></span><span class="loading-dot" aria-hidden="true"></span><span>불러오는 중</span>';
+    grid.after(loader);
+    grid.setAttribute('aria-busy', 'true');
 
+    // Start ten requests at a time, immediately revealing each completed image.
+    // Continue automatically; scrolling is never required to start the next batch.
+    try {
+      for (let start = 0; start < galleryImages.length; start += 10) {
+        await Promise.all(galleryImages.slice(start, start + 10).map((src, offset) => {
+          const index = start + offset;
+          return new Promise(resolve => {
+            const item = document.createElement('div');
+            item.className = 'gallery__item';
+            const status = document.createElement('span');
+            status.className = 'gallery__image-status';
+            status.textContent = '불러오는 중';
+            const img = document.createElement('img');
+            img.alt = `갤러리 사진 ${index + 1}`;
+            img.hidden = true;
+            item.append(status, img);
+            grid.appendChild(item);
+            item.addEventListener('click', () => openPhotoModal(galleryImages, index));
+            let settled = false;
+            const finish = success => {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timeout);
+              img.onload = img.onerror = null;
+              if (success) {
+                status.remove();
+                img.hidden = false;
+              } else {
+                img.removeAttribute('src');
+                img.remove();
+                status.textContent = '사진을 불러오지 못했습니다';
+              }
+              resolve();
+            };
+            // A stalled request must not prevent all subsequent batches loading.
+            const timeout = setTimeout(() => finish(false), 20000);
+            img.onload = () => finish(true);
+            img.onerror = () => finish(false);
+            img.src = src;
+          });
+        }));
+      }
+    } finally {
+      grid.setAttribute('aria-busy', 'false');
+      loader.remove();
+    }
+  }
   /* ═══════════════════════════════════════════
      Photo Modal (with swipe)
      ═══════════════════════════════════════════ */
@@ -621,6 +662,9 @@
   let imageCenterX = 0;
   let imageCenterY = 0;
   let swipeAllowed = false;
+  let zoomSwipeLeft = false;
+  let zoomSwipeRight = false;
+  let swipeStartTime = 0;
   let suppressModalClick = false;
   let isPinching = false;
   let touchStartX = 0;
@@ -741,7 +785,12 @@
         beginPinch(e.touches);
       } else if (e.touches.length === 1) {
         isPinching = false;
-        swipeAllowed = currentScale === 1;
+        swipeAllowed = true;
+        swipeStartTime = performance.now();
+        const maxX = Math.max(0, (img.offsetWidth * currentScale - container.clientWidth) / 2);
+        // Zoomed navigation must START at an edge, in a new single-finger gesture.
+        zoomSwipeLeft = translateX <= -maxX + 1;
+        zoomSwipeRight = translateX >= maxX - 1;
         suppressModalClick = false;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
@@ -770,7 +819,11 @@
           suppressModalClick = true;
         }
         if (currentScale > 1) {
-          swipeAllowed = false;
+          const dx = touch.clientX - touchStartX;
+          const dy = touch.clientY - touchStartY;
+          // Reversing into the photo or dragging vertically makes this pan-only.
+          if (dx > 12 || Math.abs(dy) > 35) zoomSwipeLeft = false;
+          if (dx < -12 || Math.abs(dy) > 35) zoomSwipeRight = false;
           translateX += touch.clientX - lastTouchX;
           translateY += touch.clientY - lastTouchY;
           renderTransform();
@@ -820,7 +873,13 @@
   function handleSwipe() {
     const diffX = touchStartX - touchEndX;
     const diffY = touchStartY - touchEndY;
-    if (currentScale > 1.1) return;
+    if (currentScale > 1) {
+      const elapsed = Math.max(1, performance.now() - swipeStartTime);
+      const outward = diffX > 0 ? zoomSwipeLeft : zoomSwipeRight;
+      if (!outward || Math.abs(diffX) < 100 || Math.abs(diffY) > 35 ||
+          Math.abs(diffX) < Math.abs(diffY) * 2.5 || elapsed > 450 ||
+          Math.abs(diffX) / elapsed < 0.45) return;
+    }
     const minSwipe = 50;
 
     if (Math.abs(diffX) < minSwipe || Math.abs(diffX) < Math.abs(diffY)) return;
@@ -1287,12 +1346,14 @@
     $('#storyTitle').textContent = CONFIG.story.title;
     $('#storyContent').textContent = CONFIG.story.content;
 
-    const [storyImages, galleryImages] = await Promise.all([
-      loadImagesFromFolder('story', 2, false),      // story: 2개, padding 없음
-      loadImagesFromFolder('gallery', 39, true)     // gallery: 27개, padding 있음
+    // Keep the existing numbered filenames; do not preload the entire gallery.
+    const galleryImages = Array.from({ length: 39 }, (_, index) =>
+      `images/gallery/${String(index + 1).padStart(2, '0')}.jpg`
+    );
+    await Promise.all([
+      loadImagesFromFolder('story', 2, false),
+      initGallery(galleryImages)
     ]);
-
-    initGallery(galleryImages);
   }
 
   if (document.readyState === 'loading') {
